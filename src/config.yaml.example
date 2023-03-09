@@ -1,0 +1,10 @@
+server:
+  port: 8080
+openshift:
+  auth:
+    uri: "https://oauth-openshift.apps.ocp-dev.domain/oauth/authorize?client_id=openshift-challenging-client&response_type=token"
+    username: "username"
+    password: "password"
+  api:
+    apply:
+      uri: "https://api-int.ocp-dev.domain:6443/api/<apiVersion>/namespaces/<namespace>/<resource>"
