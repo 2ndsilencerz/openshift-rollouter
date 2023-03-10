@@ -12,6 +12,7 @@ import (
 	"net/http/httputil"
 	"openshift-rollouter/config"
 	"openshift-rollouter/model"
+	"openshift-rollouter/service/openshift/utils"
 	"os"
 	"strings"
 	"time"
@@ -24,10 +25,10 @@ func Apply(c *gin.Context) {
 	apiUrl = strings.Replace(apiUrl, "<namespace>", namespace, -1)
 
 	yamlContent := saveAndLoad(c)
-	contents := ReadYaml(yamlContent)
+	contents := utils.ReadYaml(yamlContent)
 	//log.Println(contents)
 
-	resources := Categorize(contents)
+	resources := utils.Categorize(contents)
 	applyConfigMap(apiUrl, tokenAuth, "ConfigMap", resources.ConfigMap)
 	applySecret(apiUrl, tokenAuth, "Secret", resources.Secret)
 	applyService(apiUrl, tokenAuth, "Service", resources.Service)
@@ -111,13 +112,13 @@ func applyDeployment(url string, tokenAuth string, kind string, contents []model
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -132,13 +133,13 @@ func applyStatefulSet(url string, tokenAuth string, kind string, contents []mode
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -153,13 +154,13 @@ func applyCronJob(url string, tokenAuth string, kind string, contents []model.Cr
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -174,13 +175,13 @@ func applyDaemonSet(url string, tokenAuth string, kind string, contents []model.
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -195,13 +196,13 @@ func applyDeploymentConfig(url string, tokenAuth string, kind string, contents [
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -215,13 +216,13 @@ func applyConfigMap(url string, tokenAuth string, kind string, contents []model.
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -235,13 +236,13 @@ func applySecret(url string, tokenAuth string, kind string, contents []model.Sec
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -255,13 +256,13 @@ func applyService(url string, tokenAuth string, kind string, contents []model.Se
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
@@ -295,17 +296,17 @@ func applyRoute(url string, tokenAuth string, kind string, contents []model.Rout
 	for _, v := range contents {
 		method := http.MethodPost
 		currentUrl := url
-		exist, resourceVersion := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
+		exist, resourceVersion, _ := TestIfExist(url, tokenAuth, v.Metadata.Name, kind)
 		if exist {
 			method = http.MethodPut
 			v.Metadata.ResourceVersion = resourceVersion
 		}
 		vMarshalled, _ := yaml.Marshal(v)
-		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled)
+		sendToOpenshiftApi(currentUrl, tokenAuth, method, vMarshalled, false)
 	}
 }
 
-func sendToOpenshiftApi(currentUrl string, tokenAuth string, method string, content []byte) {
+func sendToOpenshiftApi(currentUrl string, tokenAuth string, method string, content []byte, rollout bool) {
 	// Create an HTTP request with the YAML file contents as the request body
 	req, err := http.NewRequest(method, currentUrl, bytes.NewBuffer(content))
 	req.Header.Add("Authorization", "Bearer "+tokenAuth)
@@ -316,7 +317,12 @@ func sendToOpenshiftApi(currentUrl string, tokenAuth string, method string, cont
 
 	// Set the Content-Type header to "application/yaml"
 	req.Header.Set("Content-Type", "application/yaml")
-
+	if method == http.MethodPatch {
+		req.Header.Set("Content-Type", "application/strategic-merge-patch+json")
+	}
+	if rollout {
+		req.Header.Set("Content-Type", "application/json")
+	}
 	// Send the HTTP request
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -324,7 +330,8 @@ func sendToOpenshiftApi(currentUrl string, tokenAuth string, method string, cont
 		},
 	}
 
-	log.Println(currentUrl)
+	rawReq, _ := httputil.DumpRequest(req, true)
+	log.Println("Request: ", string(rawReq))
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
@@ -332,22 +339,23 @@ func sendToOpenshiftApi(currentUrl string, tokenAuth string, method string, cont
 	}
 
 	dumpResp, _ := httputil.DumpResponse(resp, true)
-	log.Println("Response:", string(dumpResp))
+	log.Println("Response: ", string(dumpResp))
 	closeClient(resp)
 }
 
 type TestBody struct {
-	Kind     string   `yaml:"kind"`
-	Metadata Metadata `yaml:"metadata"`
+	Kind     string         `yaml:"kind"`
+	Metadata model.Metadata `yaml:"metadata"`
 }
 
-func TestIfExist(url string, tokenAuth string, resourceName string, resourceKind string) (bool, string) {
+func TestIfExist(url string, tokenAuth string, resourceName string, resourceKind string) (bool, string, TestBody) {
+	jsonResp := TestBody{}
 	url = url + "/" + resourceName
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("Authorization", "Bearer "+tokenAuth)
 	if err != nil {
 		log.Println(err)
-		return false, ""
+		return false, "", jsonResp
 	}
 	// Send the HTTP request
 	client := &http.Client{
@@ -356,24 +364,25 @@ func TestIfExist(url string, tokenAuth string, resourceName string, resourceKind
 		},
 	}
 
-	log.Println(url)
+	rawReq, _ := httputil.DumpRequest(req, true)
+	log.Println("Request: ", string(rawReq))
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Println(err)
-		return false, ""
+		return false, "", jsonResp
 	}
-	//dumpResp, _ := httputil.DumpResponse(resp, true)
-	//log.Println(string(dumpResp))
+
+	rawRes, _ := httputil.DumpResponse(resp, true)
+	log.Println("Response: ", string(rawRes))
 	rawResp, _ := io.ReadAll(resp.Body)
-	jsonResp := TestBody{}
 	err = json.Unmarshal(rawResp, &jsonResp)
 	if err != nil {
 		log.Println(err)
-		return false, ""
+		return false, "", jsonResp
 	}
-	log.Println(jsonResp)
+	//log.Println(jsonResp)
 	if strings.TrimSpace(jsonResp.Kind) == resourceKind {
-		return true, jsonResp.Metadata.ResourceVersion
+		return true, jsonResp.Metadata.ResourceVersion, jsonResp
 	}
-	return false, ""
+	return false, "", jsonResp
 }

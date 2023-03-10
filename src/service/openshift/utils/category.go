@@ -1,4 +1,4 @@
-package openshift
+package utils
 
 import (
 	"gopkg.in/yaml.v3"
@@ -24,14 +24,9 @@ type Resource struct {
 }
 
 type ResourceDescription struct {
-	ApiVersion string   `yaml:"apiVersion"`
-	Kind       string   `yaml:"kind"`
-	Metadata   Metadata `yaml:"metadata"`
-}
-
-type Metadata struct {
-	Name            string `yaml:"name"`
-	ResourceVersion string `yaml:"resourceVersion"`
+	ApiVersion string         `yaml:"apiVersion"`
+	Kind       string         `yaml:"kind"`
+	Metadata   model.Metadata `yaml:"metadata"`
 }
 
 func Categorize(contents []string) Resource {

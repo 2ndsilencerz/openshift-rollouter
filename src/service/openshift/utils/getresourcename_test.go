@@ -1,4 +1,4 @@
-package openshift
+package utils
 
 import (
 	"testing"

@@ -21,5 +21,8 @@ func Init() error {
 	r.POST("/apply/:namespace", func(c *gin.Context) {
 		openshift.Apply(c)
 	})
+	r.GET("/rollout/:namespace/:kind/:name", func(c *gin.Context) {
+		openshift.Rollout(c)
+	})
 	return r.Run(":" + port)
 }

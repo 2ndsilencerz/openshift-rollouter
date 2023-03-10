@@ -59,8 +59,6 @@ data:
         password: "P4ssw0rd1!"
       api:
         apply:
-          #uri: "https://api-int.ocp-dev.domain:6443/api/v1/namespaces/<namespace>/apply"
-          #uri: https://api-int.ocp-dev.domain:6443/api/v1/namespaces/<namespace>/<resource>
           uri: "https://api-int.ocp-dev.domain:6443/api/<apiVersion>/namespaces/<namespace>/<resource>"
 `
 

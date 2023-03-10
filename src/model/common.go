@@ -7,10 +7,11 @@ package model
 //}
 
 type Metadata struct {
-	Name            string            `yaml:"name"`
-	ResourceVersion string            `yaml:"resourceVersion"`
-	Labels          map[string]string `yaml:"labels"`
-	Annotations     map[string]string `yaml:"annotations"`
+	Name            string            `yaml:"name" json:"name"`
+	ResourceVersion string            `yaml:"resourceVersion" json:"resourceVersion"`
+	Labels          map[string]string `yaml:"labels" json:"labels"`
+	Annotations     map[string]string `yaml:"annotations" json:"annotations"`
+	Generation      int               `yaml:"generation" json:"generation"`
 }
 
 type SpecSelector struct {

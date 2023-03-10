@@ -1,4 +1,4 @@
-package openshift
+package utils
 
 import (
 	"testing"
@@ -34,7 +34,7 @@ data:
         <h1 style="text-align: center">Landing Page</h1>
     </body>
     <footer>
-        <p style="text-align: center" >© Multipolar Technology Tbk.</p>
+        <p style="text-align: center" >©</p>
     </footer>
   hosts: |
     127.0.0.1       localhost
@@ -98,7 +98,7 @@ spec:
         - name: regcred
       containers:
         - name: openshift-rollouter
-          image: docker.io/visiondgmlpt/openshift-rollouter:latest
+          image: openshift-rollouter:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

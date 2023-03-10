@@ -244,7 +244,7 @@ spec:
               mountPath: /app/config.yaml
               subPath: config.yaml
           terminationMessagePolicy: File
-          image: 'openshift-rollouter:latest'
+          image: 'docker.io/visiondgmlpt/openshift-rollouter:latest'
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       dnsPolicy: ClusterFirst

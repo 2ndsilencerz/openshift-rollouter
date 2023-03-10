@@ -27,8 +27,8 @@ metadata:
           'f:.dockerconfigjson': {}
         'f:type': {}
 data:
-  .dockerconfigjson: |
-	docker
+  .dockerconfigjson: >-
+    eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsidXNlcm5hbWUiOiJuYWl2YXRrbyIsInBhc3N3b3JkIjoiMzNmZTljZWEtZTNlOC00YjE1LTkwYzgtMGFhYTcxYjZhMGFhIiwiYXV0aCI6ImJtRnBkbUYwYTI4Nk16Tm1aVGxqWldFdFpUTmxPQzAwWWpFMUxUa3dZemd0TUdGaFlUY3hZalpoTUdGaCJ9fX0=
 type: kubernetes.io/dockerconfigjson
 `
 
