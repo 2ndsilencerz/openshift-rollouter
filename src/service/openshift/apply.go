@@ -10,7 +10,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httputil"
-	"openshift-rollouter/config"
 	"openshift-rollouter/model"
 	"openshift-rollouter/service/openshift/utils"
 	"os"
@@ -18,30 +17,30 @@ import (
 	"time"
 )
 
-func Apply(c *gin.Context) {
-	namespace := c.Param("namespace")
-	tokenAuth := Auth()
-	apiUrl := config.NewConfig().Viper.GetString("openshift.api.apply.uri")
-	apiUrl = strings.Replace(apiUrl, "<namespace>", namespace, -1)
-
-	yamlContent := saveAndLoad(c)
-	contents := utils.ReadYaml(yamlContent)
-	//log.Println(contents)
-
-	resources := utils.Categorize(contents)
-	applyConfigMap(apiUrl, tokenAuth, "ConfigMap", resources.ConfigMap)
-	applySecret(apiUrl, tokenAuth, "Secret", resources.Secret)
-	applyService(apiUrl, tokenAuth, "Service", resources.Service)
-	//applyIngress(apiUrl, tokenAuth, "Ingress", resources.Ingress)
-	applyRoute(apiUrl, tokenAuth, "Route", resources.Route)
-	applyDeployment(apiUrl, tokenAuth, "Deployment", resources.Deployment)
-	applyStatefulSet(apiUrl, tokenAuth, "StatefulSet", resources.StatefulSet)
-	applyDaemonSet(apiUrl, tokenAuth, "DaemonSet", resources.DaemonSet)
-	applyCronJob(apiUrl, tokenAuth, "CronJob", resources.CronJob)
-	applyDeploymentConfig(apiUrl, tokenAuth, "DeploymentConfig", resources.DeploymentConfig)
-
-	c.JSON(http.StatusOK, contents)
-}
+//func Apply(c *gin.Context) {
+//	namespace := c.Param("namespace")
+//	tokenAuth := Auth()
+//	apiUrl := config.NewConfig().Viper.GetString("openshift.api.apply.uri")
+//	apiUrl = strings.Replace(apiUrl, "<namespace>", namespace, -1)
+//
+//	yamlContent := saveAndLoad(c)
+//	contents := utils.ReadYaml(yamlContent)
+//	//log.Println(contents)
+//
+//	resources := utils.Categorize(contents)
+//	applyConfigMap(apiUrl, tokenAuth, "ConfigMap", resources.ConfigMap)
+//	applySecret(apiUrl, tokenAuth, "Secret", resources.Secret)
+//	applyService(apiUrl, tokenAuth, "Service", resources.Service)
+//	//applyIngress(apiUrl, tokenAuth, "Ingress", resources.Ingress)
+//	applyRoute(apiUrl, tokenAuth, "Route", resources.Route)
+//	applyDeployment(apiUrl, tokenAuth, "Deployment", resources.Deployment)
+//	applyStatefulSet(apiUrl, tokenAuth, "StatefulSet", resources.StatefulSet)
+//	applyDaemonSet(apiUrl, tokenAuth, "DaemonSet", resources.DaemonSet)
+//	applyCronJob(apiUrl, tokenAuth, "CronJob", resources.CronJob)
+//	applyDeploymentConfig(apiUrl, tokenAuth, "DeploymentConfig", resources.DeploymentConfig)
+//
+//	c.JSON(http.StatusOK, contents)
+//}
 
 func deleteFile(location string) {
 	err := os.Remove(location)
@@ -51,10 +50,26 @@ func deleteFile(location string) {
 }
 
 func saveAndLoad(c *gin.Context) []byte {
+	fileName := saveFile(c)
+
+	if len(fileName) > 0 {
+		//log.Println("Uploading Success with Name " + fileName)
+		defer deleteFile(fileName)
+		yamlFile, err := os.ReadFile(fileName)
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		return yamlFile
+	}
+	return nil
+}
+
+func saveFile(c *gin.Context) string {
 	file, err := c.FormFile("file")
 	if err != nil {
 		log.Println(err)
-		return nil
+		return ""
 	}
 	//log.Println(file.Filename)
 	fileName := "temp" + time.Now().Format("150405.000") + ".yaml"
@@ -62,17 +77,9 @@ func saveAndLoad(c *gin.Context) []byte {
 	err = c.SaveUploadedFile(file, fileName)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return ""
 	}
-	//log.Println("Uploading Success with Name " + fileName)
-	defer deleteFile(fileName)
-	yamlFile, err := os.ReadFile(fileName)
-	if err != nil {
-		log.Println(err)
-		return nil
-	}
-
-	return yamlFile
+	return fileName
 }
 
 //func applyResource(url string, tokenAuth string, kind string, contents []string) {
@@ -385,4 +392,10 @@ func TestIfExist(url string, tokenAuth string, resourceName string, resourceKind
 		return true, jsonResp.Metadata.ResourceVersion, jsonResp
 	}
 	return false, "", jsonResp
+}
+
+func Apply(c *gin.Context) {
+	namespace := c.Param("namespace")
+	fileName := saveFile(c)
+	c.JSON(utils.Apply(namespace, fileName))
 }
